@@ -5,6 +5,7 @@
 1. Installing vite through react and setting up tailwind css
 
 2. Login and Register
+
    1. creating api folder for backend purposes
    2. npm install express
    3. npm install mongoose
@@ -24,3 +25,5 @@
    17. create component userContext
    18. create routes folder and create routes.jsx file
    19. npm i cookie-parser
+
+3. Chat page
