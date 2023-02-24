@@ -137,4 +137,17 @@ wss.on('connection', (connection, req) => {
       }
     }
   }
+
+  // grab all the clients from websocket server (people who are online)
+  [...wss.clients].forEach((client) => {
+    client.send(
+      JSON.stringify({
+        // online is a object that has array of users who are online
+        online: [...wss.clients].map((c) => ({
+          userId: c.userId,
+          username: c.username,
+        })),
+      })
+    );
+  });
 });
