@@ -12,6 +12,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./models/User');
 
+const ws = require('ws');
+
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -107,4 +109,32 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.listen(4000);
+const server = app.listen(4000);
+
+// wss -> web socket server, ws -> web socket
+const wss = new ws.WebSocketServer({ server });
+wss.on('connection', (connection, req) => {
+  // connnection is connection b/w our server and one specici connection
+  // grab cookies from request that is having id and username
+  const cookies = req.headers.cookie;
+  // grab tokens from cookies (seprating it from other cookies)
+  if (cookies) {
+    const tokenCookieString = cookies
+      .split(';')
+      .find((str) => str.startsWith('token'));
+    if (tokenCookieString) {
+      // grab 2nd part of token
+      const token = tokenCookieString.split('=')[1];
+      if (token) {
+        // decode the token having information about user
+        jwt.verify(token, jwtSecret, {}, (err, userData) => {
+          if (err) throw err;
+          // now put this user data into connection
+          const { userId, username } = userData;
+          connection.userId = userId;
+          connection.username = username;
+        });
+      }
+    }
+  }
+});

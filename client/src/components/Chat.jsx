@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function Chat() {
+  const [ws, setWs] = useState(null);
+
+  //making connection with the server through websockets
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:4000');
+    setWs(ws);
+    // things that will happen when we recieve a message
+    ws.addEventListener('message', handleMessage);
+  }, []);
+
+  function handleMessage(e) {
+    console.log('new message', e);
+  }
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3">contacts</div>

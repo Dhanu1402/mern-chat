@@ -27,3 +27,7 @@
    19. npm i cookie-parser
 
 3. Chat page
+
+4. websockets (authentication)
+   1. create websocket server for showing how many users are onlin
+   2. npm i ws (websocket library)
