@@ -34,3 +34,5 @@
    2. npm i ws (websocket library)
 
 5. showing who is online
+
+6. user avatars

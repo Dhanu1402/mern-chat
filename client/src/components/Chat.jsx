@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import Avatar from './Avatar';
 
 export default function Chat() {
   const [ws, setWs] = useState(null);
 
   const [onlinePeople, setOnlinePeople] = useState([]);
+
+  // const [selectedUserId, setSelectedUserId] = useState(null);
 
   //making connection with the server through websockets
   useEffect(() => {
@@ -29,6 +32,8 @@ export default function Chat() {
     }
   }
 
+  // function selectContact(userId) {}
+
   return (
     <div className="flex h-screen">
       <div className="bg-white w-1/3 pl-4 pt-4">
@@ -45,8 +50,12 @@ export default function Chat() {
           ChitChat
         </div>
         {Object.keys(onlinePeople).map((userId) => (
-          <div className="border-b border-gray-100 py-2">
-            {onlinePeople[userId]}
+          <div
+            // onClick={() => selectContact(userId)}
+            className="border-b border-gray-100 py-2 flex items-center gap-1 cursor-pointer"
+          >
+            <Avatar username={onlinePeople[userId]} userId={userId} />
+            <span className="text-gray-800">{onlinePeople[userId]}</span>
           </div>
         ))}
       </div>
