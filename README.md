@@ -36,3 +36,5 @@
 5. showing who is online
 
 6. user avatars
+
+7. selecting conversations
