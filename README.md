@@ -38,3 +38,6 @@
 6. user avatars
 
 7. selecting conversations
+
+8. sending a message
+   1. npm i lodash :- library for solving common problems

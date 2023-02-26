@@ -12,6 +12,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./models/User');
 
+const Message = require('./models/Message');
+
 const ws = require('ws');
 
 const cookieParser = require('cookie-parser');
@@ -114,7 +116,7 @@ const server = app.listen(4000);
 // wss -> web socket server, ws -> web socket
 const wss = new ws.WebSocketServer({ server });
 wss.on('connection', (connection, req) => {
-  // connnection is connection b/w our server and one specici connection
+  // connnection is connection b/w our server and one specific connection
   // grab cookies from request that is having id and username
   const cookies = req.headers.cookie;
   // grab tokens from cookies (seprating it from other cookies)
@@ -137,6 +139,37 @@ wss.on('connection', (connection, req) => {
       }
     }
   }
+
+  // what should happen when connection sends message
+  connection.on('message', async (message) => {
+    const messageData = JSON.parse(message.toString());
+
+    const { recipient, text } = messageData;
+
+    // check availaabiliy of recipients & message
+    if (recipient && text) {
+      // save message in database
+      const messageDoc = await Message.create({
+        sender: connection.userId,
+        recipient,
+        text,
+      });
+
+      // sendingn message to recipient
+      [...wss.clients]
+        .filter((c) => c.userId === recipient)
+        .forEach((c) =>
+          c.send(
+            JSON.stringify({
+              text,
+              sender: connection.userId,
+              recipient,
+              id: messageDoc._id,
+            })
+          )
+        );
+    }
+  });
 
   // grab all the clients from websocket server (people who are online)
   [...wss.clients].forEach((client) => {
