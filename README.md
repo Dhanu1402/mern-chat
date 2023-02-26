@@ -40,4 +40,7 @@
 7. selecting conversations
 
 8. sending a message
+
    1. npm i lodash :- library for solving common problems
+
+9. auto scroll the conversation window

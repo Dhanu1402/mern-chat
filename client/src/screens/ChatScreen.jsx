@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import Avatar from '../components/Avatar';
 import Logo from '../components/Logo';
 import { UserContext } from '../components/UserContext';
@@ -17,6 +17,9 @@ export default function Chat() {
 
   // grab our user
   const { username, id } = useContext(UserContext);
+
+  // reference for scrolling down to the bottom when new messages arrive or when the user sends a message
+  const divUnderMessages = useRef();
 
   //making connection with the server through websockets
   useEffect(() => {
@@ -69,6 +72,14 @@ export default function Chat() {
     ]);
   }
 
+  // check when messsages will get changed and scroll to the bottom
+  useEffect(() => {
+    const div = divUnderMessages.current;
+    if (div) {
+      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [messages]);
+
   const onlinePeopleExcludingMe = { ...onlinePeople };
 
   delete onlinePeopleExcludingMe[id];
@@ -110,25 +121,30 @@ export default function Chat() {
 
           {/* displaying the conversation b/w people */}
           {!!selectedUserId && (
-            <div className="overflow-y-scroll">
-              {messagesWithoutDuplicates.map((message) => (
-                <div
-                  className={message.sender === id ? 'text-right' : 'text-left'}
-                >
+            <div className="relative h-full">
+              <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-2">
+                {messagesWithoutDuplicates.map((message) => (
                   <div
                     className={
-                      'text-left inline-block p-2 my-2 rounded-md text-sm ' +
-                      (message.sender === id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-500')
+                      message.sender === id ? 'text-right' : 'text-left'
                     }
                   >
-                    sender: {message.sender} <br />
-                    my id: {id} <br />
-                    {message.text}
+                    <div
+                      className={
+                        'text-left inline-block p-2 my-2 rounded-md text-sm ' +
+                        (message.sender === id
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-500')
+                      }
+                    >
+                      sender: {message.sender} <br />
+                      my id: {id} <br />
+                      {message.text}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+                <div ref={divUnderMessages}></div>
+              </div>
             </div>
           )}
         </div>
