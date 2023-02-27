@@ -52,3 +52,5 @@
 12. displaying the messages from the database
 
 13. online indicator & showing offline people
+
+14. killing old connections

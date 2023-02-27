@@ -152,6 +152,38 @@ const server = app.listen(4000);
 // wss -> web socket server, ws -> web socket
 const wss = new ws.WebSocketServer({ server });
 wss.on('connection', (connection, req) => {
+  function notifyAboutOnlinePeople() {
+    // grab all the clients from websocket server (people who are online)
+    [...wss.clients].forEach((client) => {
+      client.send(
+        JSON.stringify({
+          // online is a object that has array of users who are online
+          online: [...wss.clients].map((c) => ({
+            userId: c.userId,
+            username: c.username,
+          })),
+        })
+      );
+    });
+  }
+
+  connection.isAlive = true;
+
+  // ping the connection every 5 seconds to check if it is still alive
+  connection.timer = setInterval(() => {
+    connection.ping();
+    connection.deathTimer = setTimeout(() => {
+      connection.isAlive = false;
+      connection.terminate();
+      notifyAboutOnlinePeople();
+    }, 1000);
+  }, 5000);
+
+  // if connection is alive then clear the death timer
+  connection.on('pong', () => {
+    clearTimeout(connection.deathTimer);
+  });
+
   // connnection is connection b/w our server and one specific connection
   // grab cookies from request that is having id and username
   const cookies = req.headers.cookie;
@@ -207,16 +239,6 @@ wss.on('connection', (connection, req) => {
     }
   });
 
-  // grab all the clients from websocket server (people who are online)
-  [...wss.clients].forEach((client) => {
-    client.send(
-      JSON.stringify({
-        // online is a object that has array of users who are online
-        online: [...wss.clients].map((c) => ({
-          userId: c.userId,
-          username: c.username,
-        })),
-      })
-    );
-  });
+  // notify everyone about online people (when someone connects)
+  notifyAboutOnlinePeople();
 });
