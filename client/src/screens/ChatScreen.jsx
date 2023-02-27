@@ -3,6 +3,7 @@ import Avatar from '../components/Avatar';
 import Logo from '../components/Logo';
 import { UserContext } from '../components/UserContext';
 import uniqBy from 'lodash/uniqBy';
+import axios from 'axios';
 
 export default function Chat() {
   const [ws, setWs] = useState(null);
@@ -79,6 +80,14 @@ export default function Chat() {
       div.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages]);
+
+  // check changes if selectedUserId changes
+  useEffect(() => {
+    if (selectedUserId) {
+      // grab messages from database
+      axios.get('/messages/' + selectedUserId);
+    }
+  }, [selectedUserId]);
 
   const onlinePeopleExcludingMe = { ...onlinePeople };
 

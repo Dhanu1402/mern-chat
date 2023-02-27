@@ -44,3 +44,5 @@
    1. npm i lodash :- library for solving common problems
 
 9. auto scroll the conversation window
+
+10. fetching history messages from the database
