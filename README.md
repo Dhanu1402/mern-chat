@@ -48,3 +48,5 @@
 10. fetching history messages from the database
 
 11. auto re-connecting
+
+12. displaying the messages from the database
