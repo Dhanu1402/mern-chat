@@ -1,14 +1,16 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
-import Avatar from '../components/Avatar';
 import Logo from '../components/Logo';
 import { UserContext } from '../components/UserContext';
 import uniqBy from 'lodash/uniqBy';
 import axios from 'axios';
+import Contact from '../components/Contact';
 
 export default function Chat() {
   const [ws, setWs] = useState(null);
 
   const [onlinePeople, setOnlinePeople] = useState([]);
+
+  const [offlinePeople, setOfflinePeople] = useState({});
 
   const [selectedUserId, setSelectedUserId] = useState(null);
 
@@ -93,6 +95,20 @@ export default function Chat() {
     }
   }, [messages]);
 
+  // it will run everytime when online people changes
+  useEffect(() => {
+    axios.get('/people').then((res) => {
+      const offlinePeopleArr = res.data
+        .filter((p) => p._id !== id)
+        .filter((p) => !Object.keys(onlinePeople).includes(p._id));
+      const offlinePeople = {};
+      offlinePeopleArr.forEach((p) => {
+        offlinePeople[p._id] = p;
+      });
+      setOfflinePeople(offlinePeople);
+    });
+  }, [onlinePeople]);
+
   // check changes if selectedUserId changes
   useEffect(() => {
     if (selectedUserId) {
@@ -115,23 +131,27 @@ export default function Chat() {
       <div className="bg-white w-1/3">
         <Logo />
         {Object.keys(onlinePeopleExcludingMe).map((userId) => (
-          <div
+          <Contact
             key={userId}
+            id={userId}
+            online={true}
+            username={onlinePeopleExcludingMe[userId]}
+            onClick={() => {
+              setSelectedUserId(userId);
+              console.log({ userId });
+            }}
+            selected={userId === selectedUserId}
+          />
+        ))}
+        {Object.keys(offlinePeople).map((userId) => (
+          <Contact
+            key={userId}
+            id={userId}
+            online={false}
+            username={offlinePeople[userId].username}
             onClick={() => setSelectedUserId(userId)}
-            className={
-              'border-b border-gray-100 flex items-center gap-1 cursor-pointer' +
-              // if the userId is the same as the selectedUserId, then add the classes
-              (userId === selectedUserId ? 'bg-blue-500' : '')
-            }
-          >
-            {userId === selectedUserId && (
-              <div className="w-1 bg-blue-500 h-12 rounded-r-md"></div>
-            )}
-            <div className="flex gap-2 py-2 pl-4 items-center">
-              <Avatar username={onlinePeople[userId]} userId={userId} />
-              <span className="text-gray-800">{onlinePeople[userId]}</span>
-            </div>
-          </div>
+            selected={userId === selectedUserId}
+          />
         ))}
       </div>
       <div className="flex flex-col bg-blue-50 w-2/3 p-2">
