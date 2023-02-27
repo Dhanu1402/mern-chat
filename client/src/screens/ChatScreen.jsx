@@ -22,13 +22,25 @@ export default function Chat() {
   // reference for scrolling down to the bottom when new messages arrive or when the user sends a message
   const divUnderMessages = useRef();
 
-  //making connection with the server through websockets
+  // auto reconnecting with websockets
   useEffect(() => {
+    connectToWs();
+  }, []);
+
+  //function for making connection with the server through websockets
+  function connectToWs() {
     const ws = new WebSocket('ws://localhost:4000');
     setWs(ws);
     // things that will happen when we recieve a message
     ws.addEventListener('message', handleMessage);
-  }, []);
+    // things that will happen when get disconnected and reconnect
+    ws.addEventListener('close', () => {
+      setTimeOut(() => {
+        console.log('Disconnected. Trying to reconnect.');
+        connectToWs();
+      }, 1000);
+    });
+  }
 
   function showOnlinePeople(peopleArray) {
     const people = {};

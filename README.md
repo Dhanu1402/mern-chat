@@ -46,3 +46,5 @@
 9. auto scroll the conversation window
 
 10. fetching history messages from the database
+
+11. auto re-connecting
