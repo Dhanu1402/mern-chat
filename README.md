@@ -54,3 +54,5 @@
 13. online indicator & showing offline people
 
 14. killing old connections
+
+15. logout button & showing username of logged in user

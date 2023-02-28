@@ -117,6 +117,11 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/logout', (req, res) => {
+  // set empty token as cookie to logout
+  res.cookie('token', '', { sameSite: 'none', secure: true }).json('ok');
+});
+
 app.post('/register', async (req, res) => {
   // grab username and password from request body
   const { username, password } = req.body;
@@ -174,6 +179,7 @@ wss.on('connection', (connection, req) => {
     connection.ping();
     connection.deathTimer = setTimeout(() => {
       connection.isAlive = false;
+      clearInterval(connection.timer);
       connection.terminate();
       notifyAboutOnlinePeople();
     }, 1000);
