@@ -58,3 +58,5 @@
 15. logout button & showing username of logged in user
 
 16. attachments / file upload
+
+17. fixing small display bugs

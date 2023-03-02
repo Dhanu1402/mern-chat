@@ -58,8 +58,11 @@ export default function Chat() {
     if ('online' in messageData) {
       showOnlinePeople(messageData.online);
     } else if ('text' in messageData) {
-      // display incoming message
-      setMessages((prev) => [...prev, { ...messageData }]);
+      // if the message is for the selected user then add it to the messages array
+      if (messageData.sender === selectedUserId) {
+        // display incoming message
+        setMessages((prev) => [...prev, { ...messageData }]);
+      }
     }
   }
 
