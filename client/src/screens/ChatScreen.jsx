@@ -85,23 +85,24 @@ export default function Chat() {
         file,
       })
     );
-    // clear the input
-    setNewMessageText('');
-    // add the message to the messages array
-    setMessages((prev) => [
-      ...prev,
-      {
-        text: newMessageText,
-        sender: id,
-        recipient: selectedUserId,
-        _id: Date.now(),
-      },
-    ]);
     // if sending file then reload the messages
     if (file) {
       axios.get('/messages/' + selectedUserId).then((res) => {
         setMessages(res.data);
       });
+    } else {
+      // clear the input
+      setNewMessageText('');
+      // add the message to the messages array
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: newMessageText,
+          sender: id,
+          recipient: selectedUserId,
+          _id: Date.now(),
+        },
+      ]);
     }
   }
 
