@@ -56,3 +56,5 @@
 14. killing old connections
 
 15. logout button & showing username of logged in user
+
+16. attachments / file upload

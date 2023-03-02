@@ -16,9 +16,14 @@ const Message = require('./models/Message');
 
 const ws = require('ws');
 
+const fs = require('fs'); // file system library
+
 const cookieParser = require('cookie-parser');
 
 const app = express();
+
+//saving files in uploads folder
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 // connecting to database
 mongoose.connect(process.env.MONGO_URL, (err) => {
@@ -218,18 +223,38 @@ wss.on('connection', (connection, req) => {
   connection.on('message', async (message) => {
     const messageData = JSON.parse(message.toString());
 
-    const { recipient, text } = messageData;
+    const { recipient, text, file } = messageData;
+    let filename = null;
+    if (file) {
+      // making parts of name of the file
+      const parts = file.name.split('.');
+
+      // working with extension of the file
+      const ext = parts[parts.length - 1];
+
+      filename = Date.now() + '.' + ext;
+
+      // saving file to server
+      const path = __dirname + '/uploads/' + filename;
+
+      // encoding and decoding base64 data to buffer
+      const bufferData = new Buffer(file.data.split(',')[1], 'base64');
+      fs.writeFile(path, bufferData, () => {
+        console.log('file saved: ' + path);
+      });
+    }
 
     // check availaabiliy of recipients & message
-    if (recipient && text) {
+    if (recipient && (text || file)) {
       // save message in database
       const messageDoc = await Message.create({
         sender: connection.userId,
         recipient,
         text,
+        file: file ? filename : null,
       });
 
-      // sendingn message to recipient
+      // sending message to recipient
       [...wss.clients]
         .filter((c) => c.userId === recipient)
         .forEach((c) =>
@@ -238,6 +263,7 @@ wss.on('connection', (connection, req) => {
               text,
               sender: connection.userId,
               recipient,
+              file: file ? filename : null,
               _id: messageDoc._id,
             })
           )

@@ -71,14 +71,15 @@ export default function Chat() {
     });
   }
 
-  function sendMessage(ev) {
-    ev.preventDefault(); // prevent the page from refreshing
+  function sendMessage(ev, file = null) {
+    if (ev) ev.preventDefault(); // prevent the page from refreshing
     console.log('sending message');
     // grab websocket and send message with user details
     ws.send(
       JSON.stringify({
         recipient: selectedUserId,
         text: newMessageText,
+        file,
       })
     );
     // clear the input
@@ -93,6 +94,25 @@ export default function Chat() {
         _id: Date.now(),
       },
     ]);
+    // if sending file then reload the messages
+    if (file) {
+      axios.get('/messages/' + selectedUserId).then((res) => {
+        setMessages(res.data);
+      });
+    }
+  }
+
+  function sendFile(ev) {
+    // read the file
+    const reader = new FileReader();
+    reader.readAsDataURL(ev.target.files[0]);
+    //fuction will run after reading the data
+    reader.onload = () => {
+      sendMessage(null, {
+        name: ev.target.files[0].name,
+        data: reader.result,
+      });
+    };
   }
 
   // check when messsages will get changed and scroll to the bottom
@@ -215,6 +235,35 @@ export default function Chat() {
                       }
                     >
                       {message.text}
+                      {message.file && (
+                        <div>
+                          <a
+                            target="_blank"
+                            className="flex items-center gap-1 border-b"
+                            href={
+                              axios.defaults.baseURL +
+                              '/uploads/' +
+                              message.file
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-4 h-4"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                              />
+                            </svg>
+                            {message.file}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -234,6 +283,30 @@ export default function Chat() {
               placeholder="Type your message here"
               className="bg-white flex-grow border rounded-sm p-2"
             />
+            {/* attachment button */}
+            <label className="bg-blue-200 p-2 cursor-pointer text-gray-500 rounded-sm border border-blue-200">
+              <input
+                type="file"
+                className="hidden"
+                onChange={sendFile}
+                name=""
+                id=""
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                />
+              </svg>
+            </label>
             <button
               type="submit"
               className="bg-blue-500 p-2 text-white rounded-sm"
